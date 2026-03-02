@@ -8,5 +8,24 @@ data ℕ : Set where
   zero : ℕ
   suc  : ℕ → ℕ
 
-seven : ℕ
-seven = zero
+_+_ : ℕ → ℕ → ℕ
+zero + n = n
+(suc m) + n = suc (m + n)
+
+
+{-# BUILTIN NATURAL ℕ #-}
+
+_ : 2 + 3 ≡ 5
+_ =
+  begin
+    2 + 3
+  ≡⟨⟩
+    suc (1 + 3)
+  ≡⟨⟩
+    suc (suc (0 + 3))
+  ≡⟨⟩
+    suc (suc 3)
+  ≡⟨⟩
+    5
+  ∎
+
