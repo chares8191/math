@@ -35,3 +35,4 @@ col j mat = map (λ row → lookup row j) mat
 
 matMul : ∀ {m n p} → Matrix m n → Matrix n p → Matrix m p
 matMul A B = map (λ row → tabulate (λ j → dot row (col j B))) A
+
