@@ -52,6 +52,5 @@ closed-form-base :
   ClosedFormAⁿ zero ≡ ClosedFormI
 closed-form-base = refl
 
-closed-form-step :
-  ∀ n → ProductA (ClosedFormAⁿ n) ≡ ClosedFormAⁿ (suc n)
-closed-form-step n = {!!}
+-- closed-form-step : ∀ n → ProductA (ClosedFormAⁿ n) ≡ ClosedFormAⁿ (suc n)
+-- closed-form-step n = {!!}
