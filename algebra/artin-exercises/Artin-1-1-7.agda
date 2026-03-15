@@ -7,45 +7,51 @@ open import Data.Vec using ([]; _∷_)
 open import Data.Integer using (ℤ)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym)
 
-A : Matrix 3 3
-A =
+
+ClosedFormA¹ : Matrix 3 3
+ClosedFormA¹ =
   (ℤ.pos 1 ∷ ℤ.pos 1 ∷ ℤ.pos 1 ∷ []) ∷
   (ℤ.pos 0 ∷ ℤ.pos 1 ∷ ℤ.pos 1 ∷ []) ∷
   (ℤ.pos 0 ∷ ℤ.pos 0 ∷ ℤ.pos 1 ∷ []) ∷ []
 
-A² : Matrix 3 3
-A² =
+ClosedFormI : Matrix 3 3
+ClosedFormI =
+  (ℤ.pos 1 ∷ ℤ.pos 0 ∷ ℤ.pos 0 ∷ []) ∷
+  (ℤ.pos 0 ∷ ℤ.pos 1 ∷ ℤ.pos 0 ∷ []) ∷
+  (ℤ.pos 0 ∷ ℤ.pos 0 ∷ ℤ.pos 1 ∷ []) ∷ []
+
+Tr : ℕ → ℕ
+Tr zero = 0
+Tr (suc n) = Tr n + suc n
+
+ClosedFormAⁿ : ℕ → Matrix 3 3
+ClosedFormAⁿ n =
+  (ℤ.pos 1 ∷ ℤ.pos n ∷ ℤ.pos (Tr n) ∷ []) ∷
+  (ℤ.pos 0 ∷ ℤ.pos 1 ∷ ℤ.pos n      ∷ []) ∷
+  (ℤ.pos 0 ∷ ℤ.pos 0 ∷ ℤ.pos 1      ∷ []) ∷ []
+
+ProductA : (Acc : Matrix 3 3) → Matrix 3 3
+ProductA Acc = matMul Acc ClosedFormA¹
+
+ClosedFormA² : Matrix 3 3
+ClosedFormA² =
   (ℤ.pos 1 ∷ ℤ.pos 2 ∷ ℤ.pos 3 ∷ []) ∷
   (ℤ.pos 0 ∷ ℤ.pos 1 ∷ ℤ.pos 2 ∷ []) ∷
   (ℤ.pos 0 ∷ ℤ.pos 0 ∷ ℤ.pos 1 ∷ []) ∷ []
 
-A²-correct : A² ≡ matPow 2 A
-A²-correct = refl
+ProductA²≡expected : ProductA ClosedFormA¹ ≡ ClosedFormA²
+ProductA²≡expected = refl
 
-A³ : Matrix 3 3
-A³ =
-  (ℤ.pos 1 ∷ ℤ.pos 3 ∷ ℤ.pos 6 ∷ []) ∷
-  (ℤ.pos 0 ∷ ℤ.pos 1 ∷ ℤ.pos 3 ∷ []) ∷
-  (ℤ.pos 0 ∷ ℤ.pos 0 ∷ ℤ.pos 1 ∷ []) ∷ []
+PowerA : ℕ → Matrix 3 3
+PowerA zero = ClosedFormI
+PowerA (suc n) = ProductA (PowerA n)
 
-A³-correct : A³ ≡ matPow 3 A
-A³-correct = refl
+-- To Show: ClosedFormAⁿ is correct
 
-A⁴ : Matrix 3 3
-A⁴ =
-  (ℤ.pos 1 ∷ ℤ.pos 4 ∷ ℤ.pos 10 ∷ []) ∷
-  (ℤ.pos 0 ∷ ℤ.pos 1 ∷ ℤ.pos 4  ∷ []) ∷
-  (ℤ.pos 0 ∷ ℤ.pos 0 ∷ ℤ.pos 1  ∷ []) ∷ []
+closed-form-base :
+  ClosedFormAⁿ zero ≡ ClosedFormI
+closed-form-base = refl
 
-A⁴-correct : A⁴ ≡ matPow 4 A
-A⁴-correct = refl
-
-Triangular : ℕ → ℕ
-Triangular zero = 0
-Triangular (suc n) = Triangular n + (n + 1)
-
-Aⁿ : ℕ → Matrix 3 3
-Aⁿ n =
-  (ℤ.pos 1 ∷ ℤ.pos n ∷ ℤ.pos (Triangular n) ∷ []) ∷
-  (ℤ.pos 0 ∷ ℤ.pos 1 ∷ ℤ.pos n              ∷ []) ∷
-  (ℤ.pos 0 ∷ ℤ.pos 0 ∷ ℤ.pos 1              ∷ []) ∷ []
+closed-form-step :
+  ∀ n → ProductA (ClosedFormAⁿ n) ≡ ClosedFormAⁿ (suc n)
+closed-form-step n = {!!}
