@@ -55,9 +55,12 @@ module MatrixTripleProduct (l m n p : ℕ) where
     InnerLeft.Cost A B +
     OuterLeft.Cost (InnerLeft.Product A B) C
 
+  costLeftExpected : ℕ
+  costLeftExpected = l * m * n + l * n * p
+  
   CostLeft≡expected :
     (A : Matrix l m) (B : Matrix m n) (C : Matrix n p) →
-    CostLeft A B C ≡ l * m * n + l * n * p
+    CostLeft A B C ≡ costLeftExpected
   CostLeft≡expected A B C = refl
 
   CostRight :
@@ -69,8 +72,43 @@ module MatrixTripleProduct (l m n p : ℕ) where
     InnerRight.Cost B C +
     OuterRight.Cost A (InnerRight.Product B C)
 
+  costRightExpected : ℕ
+  costRightExpected = m * n * p + l * m * p
+
   CostRight≡expected :
     (A : Matrix l m) (B : Matrix m n) (C : Matrix n p) →
-    CostRight A B C ≡ m * n * p + l * m * p
+    CostRight A B C ≡ costRightExpected
   CostRight≡expected A B C = refl
+
+  OptimalLeft :
+    (A : Matrix l m) →
+    (B : Matrix m n) →
+    (C : Matrix n p) →
+    Set
+  OptimalLeft A B C = CostLeft A B C ≤ CostRight A B C
+
+  optimalLeftExpected : Set
+  optimalLeftExpected = costLeftExpected ≤ costRightExpected
+
+  OptimalLeft≡expected :
+    (A : Matrix l m) (B : Matrix m n) (C : Matrix n p) →
+    OptimalLeft A B C ≡ optimalLeftExpected
+  OptimalLeft≡expected A B C = refl
+
+  OptimalRight :
+    (A : Matrix l m) →
+    (B : Matrix m n) →
+    (C : Matrix n p) →
+    Set
+  OptimalRight A B C = CostRight A B C ≤ CostLeft A B C
+
+  optimalRightExpected : Set
+  optimalRightExpected = costRightExpected ≤ costLeftExpected
+
+  OptimalRight≡expected :
+    (A : Matrix l m) (B : Matrix m n) (C : Matrix n p) →
+    OptimalRight A B C ≡ optimalRightExpected
+  OptimalRight≡expected A B C = refl
+  
     
+  
