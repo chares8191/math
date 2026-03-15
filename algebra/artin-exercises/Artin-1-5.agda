@@ -6,35 +6,71 @@ open import Data.Nat using (ℕ; _+_; _*_; _≤_; _≤?_)
 open import Relation.Nullary.Decidable using (yes; no)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
-matMulLeft : ∀ {l m n p} → Matrix l m → Matrix m n → Matrix n p → Matrix l p
-matMulLeft A B C = matMul (matMul A B) C
+module MatrixProduct (r s t : ℕ) where
 
-matMulRight : ∀ {l m n p} → Matrix l m → Matrix m n → Matrix n p → Matrix l p
-matMulRight A B C = matMul A (matMul B C)
+  Product : (Left : Matrix r s) -> (Right : Matrix s t) -> Matrix r t
+  Product Left Right = matMul Left Right
+  
+  Cost : (Left : Matrix r s) -> (Right : Matrix s t) → ℕ
+  Cost Left Right = r * s * t
 
-Cost : ∀ {l m n} → Matrix l m → Matrix m n → ℕ
-Cost {l} {m} {n} _ _ = l * m * n
+module MatrixTripleProduct (l m n p : ℕ) where
 
-matMulLeftCost : ∀ {l m n p} → Matrix l m → Matrix m n → Matrix n p → ℕ
-matMulLeftCost A B C = Cost A B + Cost (matMul A B) C
+  module InnerLeft = MatrixProduct l m n
+  module OuterLeft = MatrixProduct l n p
 
-matMulRightCost : ∀ {l m n p} → Matrix l m → Matrix m n → Matrix n p → ℕ
-matMulRightCost A B C = Cost B C + Cost A (matMul B C)
+  module InnerRight = MatrixProduct m n p
+  module OuterRight = MatrixProduct l m p
 
-LeftCost : ℕ → ℕ → ℕ → ℕ → ℕ
-LeftCost l m n p = l * m * n + l * n * p
+  ProductLeft :
+    (A : Matrix l m) →
+    (B : Matrix m n) →
+    (C : Matrix n p) →
+    Matrix l p
+  ProductLeft A B C = OuterLeft.Product (InnerLeft.Product A B) C
 
-RightCost : ℕ → ℕ → ℕ → ℕ → ℕ
-RightCost l m n p =  m * n * p + l * m * p
+  ProductLeft≡expected :
+    (A : Matrix l m) (B : Matrix m n) (C : Matrix n p) →
+    ProductLeft A B C ≡ matMul (matMul A B) C
+  ProductLeft≡expected A B C = refl
 
-matMulLeftCost-actual :
-  ∀ {l m n p} (A : Matrix l m) (B : Matrix m n) (C : Matrix n p) →
-  matMulLeftCost A B C ≡ LeftCost l m n p
-matMulLeftCost-actual A B C = refl
+  ProductRight :
+    (A : Matrix l m) →
+    (B : Matrix m n) →
+    (C : Matrix n p) →
+    Matrix l p
+  ProductRight A B C = OuterRight.Product A (InnerRight.Product B C)
 
-matMulRightCost-actual :
-  ∀ {l m n p} (A : Matrix l m) (B : Matrix m n) (C : Matrix n p) →
-  matMulRightCost A B C ≡ RightCost l m n p
-matMulRightCost-actual A B C = refl
+  ProductRight≡expected :
+    (A : Matrix l m) (B : Matrix m n) (C : Matrix n p) →
+    ProductRight A B C ≡ matMul A (matMul B C)
+  ProductRight≡expected A B C = refl
 
+  CostLeft :
+    (A : Matrix l m) →
+    (B : Matrix m n) →
+    (C : Matrix n p) →
+    ℕ
+  CostLeft A B C =
+    InnerLeft.Cost A B +
+    OuterLeft.Cost (InnerLeft.Product A B) C
 
+  CostLeft≡expected :
+    (A : Matrix l m) (B : Matrix m n) (C : Matrix n p) →
+    CostLeft A B C ≡ l * m * n + l * n * p
+  CostLeft≡expected A B C = refl
+
+  CostRight :
+    (A : Matrix l m) →
+    (B : Matrix m n) →
+    (C : Matrix n p) →
+    ℕ
+  CostRight A B C =
+    InnerRight.Cost B C +
+    OuterRight.Cost A (InnerRight.Product B C)
+
+  CostRight≡expected :
+    (A : Matrix l m) (B : Matrix m n) (C : Matrix n p) →
+    CostRight A B C ≡ m * n * p + l * m * p
+  CostRight≡expected A B C = refl
+    
