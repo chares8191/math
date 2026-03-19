@@ -1,0 +1,29 @@
+module NatHelpers where
+
+open import Data.Nat using (ℕ; zero; suc; _+_; _*_)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym)
+
+-- ℕ Arithmetic Lemmas
+*-zeroʳ : ∀ n → n * zero ≡ zero
+*-zeroʳ zero = refl
+*-zeroʳ (suc n) rewrite *-zeroʳ n = refl
+
+*-zeroˡ : ∀ n → n * zero ≡ zero
+*-zeroˡ zero = refl
+*-zeroˡ (suc n) rewrite *-zeroˡ n = refl
+
+*-oneʳ : ∀ n → n * suc zero ≡ n
+*-oneʳ zero = refl
+*-oneʳ (suc n) rewrite *-oneʳ n = refl
+
+*-oneˡ : ∀ n → n * suc zero ≡ n
+*-oneˡ zero = refl
+*-oneˡ (suc n) rewrite *-oneˡ n = refl
+
++-zeroˡ : ∀ n → zero + n ≡ n
++-zeroˡ zero = refl
++-zeroˡ (suc n) rewrite +-zeroˡ n = refl
+
++-zeroʳ : ∀ n → n + zero ≡ n
++-zeroʳ zero = refl
++-zeroʳ (suc n) rewrite +-zeroʳ n = refl

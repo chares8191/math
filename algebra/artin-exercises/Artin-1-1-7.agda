@@ -1,5 +1,6 @@
 module Artin-1-1-7 where
 
+open import NatHelpers
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Nat using (ℕ; zero; suc; _+_; _*_)
 open import Data.Vec using (Vec; []; _∷_; map; zipWith; foldr′; lookup; tabulate)
@@ -25,7 +26,11 @@ Triple = Vec ℕ 3
 
 -- Triple Element
 VecElem : Triple → Fin 3 → ℕ
-VecElem vec k = lookup vec k
+VecElem T k = lookup T k
+
+Triple-Elem≡expected :
+  ∀ T → VecElem T Idx₁ ∷ VecElem T Idx₂ ∷ VecElem T Idx₃ ∷ [] ≡ T
+Triple-Elem≡expected (x ∷ y ∷ z ∷ []) = refl
 
 -- Triple Product
 VecProduct : Triple → Triple → ℕ
@@ -40,18 +45,33 @@ Matrix = Vec Triple 3
 
 -- 3x3 Matrix Element
 MtxElem : Matrix → Fin 3 → Fin 3 → ℕ
-MtxElem mtx i j = VecElem (lookup mtx i) j
+MtxElem M i j = VecElem (lookup M i) j
 
 -- 3x3 Matrix Row
 MtxRow : Matrix → Fin 3 → Triple
-MtxRow mtx i = lookup mtx i
+MtxRow M i =
+  MtxElem M i Idx₁ ∷
+  MtxElem M i Idx₂ ∷
+  MtxElem M i Idx₃ ∷ []
+
+MtxRow-Elem≡expected :
+  ∀ M i j → VecElem (MtxRow M i) j ≡ MtxElem M i j
+MtxRow-Elem≡expected M i fzero               = refl
+MtxRow-Elem≡expected M i (fsuc fzero)        = refl
+MtxRow-Elem≡expected M i (fsuc (fsuc fzero)) = refl
 
 -- 3x3 Matrix Column
 MtxCol : Matrix → Fin 3 → Triple
-MtxCol mtx j =
-  MtxElem mtx Idx₁ j ∷
-  MtxElem mtx Idx₂ j ∷
-  MtxElem mtx Idx₃ j ∷ []
+MtxCol M j =
+  MtxElem M Idx₁ j ∷
+  MtxElem M Idx₂ j ∷
+  MtxElem M Idx₃ j ∷ []
+
+MtxCol-Elem≡expected :
+  ∀ M i j → VecElem (MtxCol M j) i ≡ MtxElem M i j
+MtxCol-Elem≡expected M fzero j               = refl
+MtxCol-Elem≡expected M (fsuc fzero) j        = refl
+MtxCol-Elem≡expected M (fsuc (fsuc fzero)) j = refl
 
 -- 3x3 Matrix Product Element
 MtxProduct-Elem :
@@ -120,45 +140,39 @@ VecIdy (fsuc (fsuc fzero)) = 0 ∷ 0 ∷ 1 ∷ []
 
 VecProduct-RightIdy≡expected :
   ∀ X k → VecProduct X (VecIdy k) ≡ VecElem X k
-VecProduct-RightIdy≡expected X fzero =
-  begin
-    VecProduct X (VecIdy fzero)
-  ≡⟨⟩
-    (VecElem X Idx₁ * VecElem (VecIdy fzero) Idx₁) +
-    (VecElem X Idx₂ * VecElem (VecIdy fzero) Idx₂) +
-    (VecElem X Idx₃ * VecElem (VecIdy fzero) Idx₃)
-  ≡⟨⟩
-    (VecElem X Idx₁ * 1) +
-    (VecElem X Idx₂ * 0) +
-    (VecElem X Idx₃ * 0)
-  ≡⟨⟩
-    {!!}
-VecProduct-RightIdy≡expected X (fsuc fzero) =
-  begin
-    VecProduct X (VecIdy (fsuc fzero))
-  ≡⟨⟩
-    (VecElem X Idx₁ * VecElem (VecIdy (fsuc fzero)) Idx₁) +
-    (VecElem X Idx₂ * VecElem (VecIdy (fsuc fzero)) Idx₂) +
-    (VecElem X Idx₃ * VecElem (VecIdy (fsuc fzero)) Idx₃)
-  ≡⟨⟩
-    (VecElem X Idx₁ * 0) +
-    (VecElem X Idx₂ * 1) +
-    (VecElem X Idx₃ * 0)
-  ≡⟨⟩
-    {!!}
-VecProduct-RightIdy≡expected X (fsuc (fsuc fzero)) =
-  begin
-    VecProduct X (VecIdy (fsuc (fsuc fzero)))
-  ≡⟨⟩
-    (VecElem X Idx₁ * VecElem (VecIdy (fsuc (fsuc fzero))) Idx₁) +
-    (VecElem X Idx₂ * VecElem (VecIdy (fsuc (fsuc fzero))) Idx₂) +
-    (VecElem X Idx₃ * VecElem (VecIdy (fsuc (fsuc fzero))) Idx₃)
-  ≡⟨⟩
-    (VecElem X Idx₁ * 0) +
-    (VecElem X Idx₂ * 0) +
-    (VecElem X Idx₃ * 1)
-  ≡⟨⟩
-    {!!!}
+VecProduct-RightIdy≡expected X fzero
+  rewrite *-oneʳ  (VecElem X Idx₁)
+        | *-zeroʳ (VecElem X Idx₂)
+        | *-zeroʳ (VecElem X Idx₃)
+        | +-zeroʳ (VecElem X Idx₁)
+        | +-zeroʳ (VecElem X Idx₁)
+  = refl
+VecProduct-RightIdy≡expected X (fsuc fzero)
+  rewrite *-zeroʳ (VecElem X Idx₁)
+        | *-oneʳ  (VecElem X Idx₂)
+        | *-zeroʳ (VecElem X Idx₃)
+        | +-zeroʳ (VecElem X Idx₂)
+  = refl
+VecProduct-RightIdy≡expected X (fsuc (fsuc fzero))
+  rewrite *-zeroʳ (VecElem X Idx₁)
+        | *-zeroʳ (VecElem X Idx₂)
+        | *-oneʳ  (VecElem X Idx₃)
+  = refl
+
+VecProduct-LeftIdy≡expected :
+  ∀ X k → VecProduct (VecIdy k) X ≡ VecElem X k
+VecProduct-LeftIdy≡expected X fzero
+  rewrite +-zeroʳ (VecElem X Idx₁)
+        | +-zeroʳ (VecElem X Idx₁)
+        | +-zeroʳ (VecElem X Idx₁)
+  = refl
+VecProduct-LeftIdy≡expected X (fsuc fzero)
+  rewrite +-zeroʳ (VecElem X Idx₂)
+        | +-zeroʳ (VecElem X Idx₂)
+  = refl
+VecProduct-LeftIdy≡expected X (fsuc (fsuc fzero))
+  rewrite +-zeroʳ  (VecElem X Idx₃)
+  = refl
 
 -- 3x3 Matrix Identity
 MtxIdy : Matrix
@@ -167,17 +181,46 @@ MtxIdy =
   VecIdy Idx₂ ∷
   VecIdy Idx₃ ∷ []
 
+MtxIdy-Row≡expected : ∀ i → MtxRow MtxIdy i ≡ VecIdy i
+MtxIdy-Row≡expected fzero
+  rewrite Triple-Elem≡expected (MtxRow MtxIdy fzero)
+  = refl
+MtxIdy-Row≡expected (fsuc fzero)
+  rewrite Triple-Elem≡expected (MtxRow MtxIdy (fsuc fzero))
+  = refl
+MtxIdy-Row≡expected (fsuc (fsuc fzero))
+  rewrite Triple-Elem≡expected (MtxRow MtxIdy (fsuc (fsuc fzero)))
+  = refl
+
+MtxIdy-Col≡expected : ∀ i → MtxCol MtxIdy i ≡ VecIdy i
+MtxIdy-Col≡expected fzero
+  rewrite Triple-Elem≡expected (MtxCol MtxIdy fzero)
+  = refl
+MtxIdy-Col≡expected (fsuc fzero)
+  rewrite Triple-Elem≡expected (MtxCol MtxIdy (fsuc fzero))
+  = refl
+MtxIdy-Col≡expected (fsuc (fsuc fzero))
+  rewrite Triple-Elem≡expected (MtxCol MtxIdy (fsuc (fsuc fzero)))
+  = refl
+
 MtxProduct-Row-RightIdy≡expected :
   ∀ A i → MtxProduct-Row A MtxIdy i ≡ MtxRow A i
-MtxProduct-Row-RightIdy≡expected A i =
-  begin
-    MtxProduct-Row A MtxIdy i
-  ≡⟨⟩
-    VecProduct (MtxRow A i) (VecIdy Idx₁) ∷
-    VecProduct (MtxRow A i) (VecIdy Idx₂) ∷
-    VecProduct (MtxRow A i) (VecIdy Idx₃) ∷ []
-  ≡⟨⟩
-    {!!}
+MtxProduct-Row-RightIdy≡expected A i
+  rewrite VecProduct-RightIdy≡expected (MtxRow A i) Idx₁
+        | VecProduct-RightIdy≡expected (MtxRow A i) Idx₂
+        | VecProduct-RightIdy≡expected (MtxRow A i) Idx₃
+        | Triple-Elem≡expected (MtxRow A i)
+  = refl
+
+MtxProduct-Row-LeftIdy≡expected :
+  ∀ A i → MtxProduct-Row MtxIdy A i ≡ MtxRow A i
+MtxProduct-Row-LeftIdy≡expected A i
+  rewrite MtxIdy-Row≡expected i
+        | VecProduct-LeftIdy≡expected (MtxCol A Idx₁) i
+        | VecProduct-LeftIdy≡expected (MtxCol A Idx₂) i
+        | VecProduct-LeftIdy≡expected (MtxCol A Idx₃) i
+        | Triple-Elem≡expected (MtxRow A i)
+  = refl
 
 MtxProduct-RightIdy≡expected :
   ∀ A → MtxProduct A MtxIdy ≡ A
