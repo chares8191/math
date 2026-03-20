@@ -48,39 +48,39 @@ VecIdy fzero               = 1 ∷ 0 ∷ 0 ∷ []
 VecIdy (fsuc fzero)        = 0 ∷ 1 ∷ 0 ∷ []
 VecIdy (fsuc (fsuc fzero)) = 0 ∷ 0 ∷ 1 ∷ []
 
-VecProduct-Idyʳ≡expected :
+VecProductIdyʳ≡expected :
   ∀ T k → VecProduct T (VecIdy k) ≡ VecElem T k
-VecProduct-Idyʳ≡expected T fzero
+VecProductIdyʳ≡expected T fzero
   rewrite *-oneʳ  (VecElem T Idx₁)
         | *-zeroʳ (VecElem T Idx₂)
         | *-zeroʳ (VecElem T Idx₃)
         | +-zeroʳ (VecElem T Idx₁)
         | +-zeroʳ (VecElem T Idx₁)
   = refl
-VecProduct-Idyʳ≡expected T (fsuc fzero)
+VecProductIdyʳ≡expected T (fsuc fzero)
   rewrite *-zeroʳ (VecElem T Idx₁)
         | *-oneʳ  (VecElem T Idx₂)
         | *-zeroʳ (VecElem T Idx₃)
         | +-zeroʳ (VecElem T Idx₂)
   = refl
-VecProduct-Idyʳ≡expected T (fsuc (fsuc fzero))
+VecProductIdyʳ≡expected T (fsuc (fsuc fzero))
   rewrite *-zeroʳ (VecElem T Idx₁)
         | *-zeroʳ (VecElem T Idx₂)
         | *-oneʳ  (VecElem T Idx₃)
   = refl
 
-VecProduct-Idyˡ≡expected :
+VecProductIdyˡ≡expected :
   ∀ T k → VecProduct (VecIdy k) T ≡ VecElem T k
-VecProduct-Idyˡ≡expected T fzero
+VecProductIdyˡ≡expected T fzero
   rewrite +-zeroʳ (VecElem T Idx₁)
         | +-zeroʳ (VecElem T Idx₁)
         | +-zeroʳ (VecElem T Idx₁)
   = refl
-VecProduct-Idyˡ≡expected T (fsuc fzero)
+VecProductIdyˡ≡expected T (fsuc fzero)
   rewrite +-zeroʳ (VecElem T Idx₂)
         | +-zeroʳ (VecElem T Idx₂)
   = refl
-VecProduct-Idyˡ≡expected T (fsuc (fsuc fzero))
+VecProductIdyˡ≡expected T (fsuc (fsuc fzero))
   rewrite +-zeroʳ  (VecElem T Idx₃)
   = refl
 
@@ -88,59 +88,80 @@ VecProduct-Idyˡ≡expected T (fsuc (fsuc fzero))
 Matrix : Set
 Matrix = Vec Triple 3
 
--- 3x3 Matrix Element
+-- Matrix Element
 MtxElem : Matrix → Fin 3 → Fin 3 → ℕ
 MtxElem M i j = VecElem (lookup M i) j
 
--- 3x3 Matrix Row
+MtxElem≡expected :
+  ∀ M →
+  (MtxElem M Idx₁ Idx₁ ∷
+   MtxElem M Idx₁ Idx₂ ∷
+   MtxElem M Idx₁ Idx₃ ∷ []) ∷
+  (MtxElem M Idx₂ Idx₁ ∷
+   MtxElem M Idx₂ Idx₂ ∷
+   MtxElem M Idx₂ Idx₃ ∷ []) ∷
+  (MtxElem M Idx₃ Idx₁ ∷
+   MtxElem M Idx₃ Idx₂ ∷
+   MtxElem M Idx₃ Idx₃ ∷ []) ∷ [] ≡ M
+MtxElem≡expected (T₁ ∷ T₂ ∷ T₃ ∷ [])
+  rewrite Triple-Elem≡expected T₁
+        | Triple-Elem≡expected T₂
+        | Triple-Elem≡expected T₃
+  = refl
+
+-- Matrix Row
 MtxRow : Matrix → Fin 3 → Triple
 MtxRow M i =
   MtxElem M i Idx₁ ∷
   MtxElem M i Idx₂ ∷
   MtxElem M i Idx₃ ∷ []
 
-MtxRow-Elem≡expected :
+-- Matrix Element By Row Slice
+MtxElem-ByRow≡expected :
   ∀ M i j → VecElem (MtxRow M i) j ≡ MtxElem M i j
-MtxRow-Elem≡expected M i fzero               = refl
-MtxRow-Elem≡expected M i (fsuc fzero)        = refl
-MtxRow-Elem≡expected M i (fsuc (fsuc fzero)) = refl
+MtxElem-ByRow≡expected M i fzero               = refl
+MtxElem-ByRow≡expected M i (fsuc fzero)        = refl
+MtxElem-ByRow≡expected M i (fsuc (fsuc fzero)) = refl
 
--- 3x3 Matrix Column
+-- Matrix Column
 MtxCol : Matrix → Fin 3 → Triple
 MtxCol M j =
   MtxElem M Idx₁ j ∷
   MtxElem M Idx₂ j ∷
   MtxElem M Idx₃ j ∷ []
 
-MtxCol-Elem≡expected :
+-- Matrix Element By Column Slice
+MtxElem-ByCol≡expected :
   ∀ M i j → VecElem (MtxCol M j) i ≡ MtxElem M i j
-MtxCol-Elem≡expected M fzero j               = refl
-MtxCol-Elem≡expected M (fsuc fzero) j        = refl
-MtxCol-Elem≡expected M (fsuc (fsuc fzero)) j = refl
+MtxElem-ByCol≡expected M fzero j               = refl
+MtxElem-ByCol≡expected M (fsuc fzero) j        = refl
+MtxElem-ByCol≡expected M (fsuc (fsuc fzero)) j = refl
 
-MtxRow-Col≡expected :
+-- Matrix Column By Row Slice
+MtxCol-ByRow≡expected :
   ∀ M j →
   VecElem (MtxRow M Idx₁) j ∷
   VecElem (MtxRow M Idx₂) j ∷
   VecElem (MtxRow M Idx₃) j ∷ [] ≡ MtxCol M j
-MtxRow-Col≡expected M j
-  rewrite MtxRow-Elem≡expected M Idx₁ j
-        | MtxRow-Elem≡expected M Idx₂ j
-        | MtxRow-Elem≡expected M Idx₃ j
+MtxCol-ByRow≡expected M j
+  rewrite MtxElem-ByRow≡expected M Idx₁ j
+        | MtxElem-ByRow≡expected M Idx₂ j
+        | MtxElem-ByRow≡expected M Idx₃ j
   = refl
 
-MtxCol-Row≡expected :
+-- Matrix Row By Column Slice
+MtxRow-ByCol≡expected :
   ∀ M i →
   VecElem (MtxCol M Idx₁) i ∷
   VecElem (MtxCol M Idx₂) i ∷
   VecElem (MtxCol M Idx₃) i ∷ [] ≡ MtxRow M i
-MtxCol-Row≡expected M i
-  rewrite MtxCol-Elem≡expected M i Idx₁
-        | MtxCol-Elem≡expected M i Idx₂
-        | MtxCol-Elem≡expected M i Idx₃
+MtxRow-ByCol≡expected M i
+  rewrite MtxElem-ByCol≡expected M i Idx₁
+        | MtxElem-ByCol≡expected M i Idx₂
+        | MtxElem-ByCol≡expected M i Idx₃
   = refl
 
--- 3x3 Matrix Product Element
+-- Matrix Product Element
 MtxProduct-Elem :
   Matrix →
   Matrix →
@@ -148,237 +169,224 @@ MtxProduct-Elem :
   Fin 3 → ℕ
 MtxProduct-Elem A B i j = VecProduct (MtxRow A i) (MtxCol B j)
 
-MtxProduct-Elem-expected :
-  Matrix →
-  Matrix →
-  Fin 3 →
-  Fin 3 → ℕ
-MtxProduct-Elem-expected A B i j =
-  (MtxElem A i Idx₁) * (MtxElem B Idx₁ j) +
-  (MtxElem A i Idx₂) * (MtxElem B Idx₂ j) +
-  (MtxElem A i Idx₃) * (MtxElem B Idx₃ j)
-
 MtxProduct-Elem≡expected :
   ∀ A B i j →
-  MtxProduct-Elem A B i j ≡ MtxProduct-Elem-expected A B i j
+  MtxProduct-Elem A B i j ≡
+    (MtxElem A i Idx₁) * (MtxElem B Idx₁ j) +
+    (MtxElem A i Idx₂) * (MtxElem B Idx₂ j) +
+    (MtxElem A i Idx₃) * (MtxElem B Idx₃ j)
 MtxProduct-Elem≡expected A B i j = refl
 
--- 3x3 Matrix Product Row
+-- Matrix Product Row
 MtxProduct-Row : Matrix → Matrix → Fin 3 → Triple
 MtxProduct-Row A B i =
   VecProduct (MtxRow A i) (MtxCol B Idx₁) ∷
   VecProduct (MtxRow A i) (MtxCol B Idx₂) ∷
   VecProduct (MtxRow A i) (MtxCol B Idx₃) ∷ []
 
-MtxProduct-Row-expected : Matrix → Matrix → Fin 3 → Triple
-MtxProduct-Row-expected A B i =
-  MtxProduct-Elem-expected A B i Idx₁ ∷
-  MtxProduct-Elem-expected A B i Idx₂ ∷
-  MtxProduct-Elem-expected A B i Idx₃ ∷ []
-
 MtxProduct-Row≡expected :
   ∀ A B i →
-  MtxProduct-Row A B i ≡ MtxProduct-Row-expected A B i
+  MtxProduct-Row A B i ≡
+    MtxProduct-Elem A B i Idx₁ ∷
+    MtxProduct-Elem A B i Idx₂ ∷
+    MtxProduct-Elem A B i Idx₃ ∷ []
 MtxProduct-Row≡expected A B i = refl
 
--- 3x3 Matrix Product
+-- Matrix Product Column
+MtxProduct-Col : Matrix → Matrix → Fin 3 → Triple
+MtxProduct-Col A B j =
+  VecProduct (MtxRow A Idx₁) (MtxCol B j) ∷
+  VecProduct (MtxRow A Idx₂) (MtxCol B j) ∷
+  VecProduct (MtxRow A Idx₃) (MtxCol B j) ∷ []
+
+MtxProduct-Col≡expected :
+  ∀ A B j →
+  MtxProduct-Col A B j ≡
+    MtxProduct-Elem A B Idx₁ j ∷
+    MtxProduct-Elem A B Idx₂ j ∷
+    MtxProduct-Elem A B Idx₃ j ∷ []
+MtxProduct-Col≡expected A B j = refl
+
+-- Matrix Product
 MtxProduct : Matrix → Matrix → Matrix
 MtxProduct A B =
   MtxProduct-Row A B Idx₁ ∷
   MtxProduct-Row A B Idx₂ ∷
   MtxProduct-Row A B Idx₃ ∷ []
 
-MtxProduct-expected : Matrix → Matrix → Matrix
-MtxProduct-expected A B =
-  MtxProduct-Row-expected A B Idx₁ ∷
-  MtxProduct-Row-expected A B Idx₂ ∷
-  MtxProduct-Row-expected A B Idx₃ ∷ []
-
 MtxProduct≡expected :
   ∀ A B →
-  MtxProduct A B ≡ MtxProduct-expected A B
+  MtxProduct A B ≡
+  (MtxProduct-Elem A B Idx₁ Idx₁ ∷
+   MtxProduct-Elem A B Idx₁ Idx₂ ∷
+   MtxProduct-Elem A B Idx₁ Idx₃ ∷ []) ∷
+  (MtxProduct-Elem A B Idx₂ Idx₁ ∷
+   MtxProduct-Elem A B Idx₂ Idx₂ ∷
+   MtxProduct-Elem A B Idx₂ Idx₃ ∷ []) ∷
+  (MtxProduct-Elem A B Idx₃ Idx₁ ∷
+   MtxProduct-Elem A B Idx₃ Idx₂ ∷
+   MtxProduct-Elem A B Idx₃ Idx₃ ∷ []) ∷ []
 MtxProduct≡expected A B = refl
 
--- 3x3 Matrix Identity
+-- 3x3 Identity Matrix
 MtxIdy : Matrix
 MtxIdy =
   VecIdy Idx₁ ∷
   VecIdy Idx₂ ∷
   VecIdy Idx₃ ∷ []
 
+-- Identity Matrix Row
 MtxIdy-Row≡expected : ∀ i → MtxRow MtxIdy i ≡ VecIdy i
 MtxIdy-Row≡expected fzero
-  rewrite Triple-Elem≡expected (MtxRow MtxIdy fzero)
+  rewrite Triple-Elem≡expected (MtxRow MtxIdy Idx₁)
   = refl
 MtxIdy-Row≡expected (fsuc fzero)
-  rewrite Triple-Elem≡expected (MtxRow MtxIdy (fsuc fzero))
+  rewrite Triple-Elem≡expected (MtxRow MtxIdy Idx₂)
   = refl
 MtxIdy-Row≡expected (fsuc (fsuc fzero))
-  rewrite Triple-Elem≡expected (MtxRow MtxIdy (fsuc (fsuc fzero)))
+  rewrite Triple-Elem≡expected (MtxRow MtxIdy Idx₃)
   = refl
 
+-- Identity Matrix Column
 MtxIdy-Col≡expected : ∀ j → MtxCol MtxIdy j ≡ VecIdy j
 MtxIdy-Col≡expected fzero
-  rewrite Triple-Elem≡expected (MtxCol MtxIdy fzero)
+  rewrite Triple-Elem≡expected (MtxCol MtxIdy Idx₁)
   = refl
 MtxIdy-Col≡expected (fsuc fzero)
-  rewrite Triple-Elem≡expected (MtxCol MtxIdy (fsuc fzero))
+  rewrite Triple-Elem≡expected (MtxCol MtxIdy Idx₂)
   = refl
 MtxIdy-Col≡expected (fsuc (fsuc fzero))
-  rewrite Triple-Elem≡expected (MtxCol MtxIdy (fsuc (fsuc fzero)))
+  rewrite Triple-Elem≡expected (MtxCol MtxIdy Idx₃)
   = refl
 
-MtxProduct-Elem-Idyʳ≡expected :
+-- Identity Matrix Right Product Element
+MtxProductIdyʳ-Elem≡expected :
   ∀ M i j → MtxProduct-Elem M MtxIdy i j ≡ MtxElem M i j
-MtxProduct-Elem-Idyʳ≡expected M i fzero
-  rewrite VecProduct-Idyʳ≡expected (MtxRow M i) Idx₁
-        | MtxRow-Elem≡expected M i Idx₁
+MtxProductIdyʳ-Elem≡expected M i fzero
+  rewrite VecProductIdyʳ≡expected (MtxRow M i) Idx₁
+        | MtxElem-ByRow≡expected M i Idx₁
   = refl
-MtxProduct-Elem-Idyʳ≡expected M i (fsuc fzero)
-  rewrite VecProduct-Idyʳ≡expected (MtxRow M i) Idx₂
-        | MtxRow-Elem≡expected M i Idx₂
+MtxProductIdyʳ-Elem≡expected M i (fsuc fzero)
+  rewrite VecProductIdyʳ≡expected (MtxRow M i) Idx₂
+        | MtxElem-ByRow≡expected M i Idx₂
   = refl
-MtxProduct-Elem-Idyʳ≡expected M i (fsuc (fsuc fzero))
-  rewrite VecProduct-Idyʳ≡expected (MtxRow M i) Idx₃
-        | MtxRow-Elem≡expected M i Idx₃
+MtxProductIdyʳ-Elem≡expected M i (fsuc (fsuc fzero))
+  rewrite VecProductIdyʳ≡expected (MtxRow M i) Idx₃
+        | MtxElem-ByRow≡expected M i Idx₃
   = refl
 
-MtxProduct-Elem-Idyˡ≡expected :
+-- Identity Matrix Left Product Element
+MtxProductIdyˡ-Elem≡expected :
   ∀ M i j → MtxProduct-Elem MtxIdy M i j ≡ MtxElem M i j
-MtxProduct-Elem-Idyˡ≡expected M fzero j
-  rewrite VecProduct-Idyˡ≡expected (MtxCol M j) Idx₁
-        | MtxCol-Elem≡expected M Idx₁ j
+MtxProductIdyˡ-Elem≡expected M fzero j
+  rewrite VecProductIdyˡ≡expected (MtxCol M j) Idx₁
+        | MtxElem-ByCol≡expected M Idx₁ j
   = refl
-MtxProduct-Elem-Idyˡ≡expected M (fsuc fzero) j
-  rewrite VecProduct-Idyˡ≡expected (MtxCol M j) Idx₂
-        | MtxCol-Elem≡expected M Idx₂ j
+MtxProductIdyˡ-Elem≡expected M (fsuc fzero) j
+  rewrite VecProductIdyˡ≡expected (MtxCol M j) Idx₂
+        | MtxElem-ByCol≡expected M Idx₂ j
   = refl
-MtxProduct-Elem-Idyˡ≡expected M (fsuc (fsuc fzero)) j
-  rewrite VecProduct-Idyˡ≡expected (MtxCol M j) Idx₃
-        | MtxCol-Elem≡expected M Idx₃ j
+MtxProductIdyˡ-Elem≡expected M (fsuc (fsuc fzero)) j
+  rewrite VecProductIdyˡ≡expected (MtxCol M j) Idx₃
+        | MtxElem-ByCol≡expected M Idx₃ j
   = refl
 
-MtxProduct-Row-Idyʳ≡expected :
+-- Identity Matrix Right Product Row
+MtxProductIdyʳ-Row≡expected :
   ∀ M i → MtxProduct-Row M MtxIdy i ≡ MtxRow M i
-MtxProduct-Row-Idyʳ≡expected M i
-  rewrite MtxProduct-Elem-Idyʳ≡expected M i Idx₁
-        | MtxProduct-Elem-Idyʳ≡expected M i Idx₂
-        | MtxProduct-Elem-Idyʳ≡expected M i Idx₃
+MtxProductIdyʳ-Row≡expected M i
+  rewrite MtxProductIdyʳ-Elem≡expected M i Idx₁
+        | MtxProductIdyʳ-Elem≡expected M i Idx₂
+        | MtxProductIdyʳ-Elem≡expected M i Idx₃
   = refl
 
-MtxProduct-Row-Idyˡ≡expected :
+-- Identity Matrix Left Product Row
+MtxProductIdyˡ-Row≡expected :
   ∀ M i → MtxProduct-Row MtxIdy M i ≡ MtxRow M i
-MtxProduct-Row-Idyˡ≡expected M i
-  rewrite MtxProduct-Elem-Idyˡ≡expected M i Idx₁
-        | MtxProduct-Elem-Idyˡ≡expected M i Idx₂
-        | MtxProduct-Elem-Idyˡ≡expected M i Idx₃
+MtxProductIdyˡ-Row≡expected M i
+  rewrite MtxProductIdyˡ-Elem≡expected M i Idx₁
+        | MtxProductIdyˡ-Elem≡expected M i Idx₂
+        | MtxProductIdyˡ-Elem≡expected M i Idx₃
   = refl
 
-MtxProduct-Idyʳ≡expected :
-  ∀ A → MtxProduct A MtxIdy ≡ A
-MtxProduct-Idyʳ≡expected A =
-  begin
-    MtxProduct A MtxIdy
-  ≡⟨⟩
-    MtxProduct-Row A MtxIdy Idx₁ ∷
-    MtxProduct-Row A MtxIdy Idx₂ ∷
-    MtxProduct-Row A MtxIdy Idx₃ ∷ []
-  ≡⟨⟩
-    {!!}
+-- Identity Matrix Right Product Column
+MtxProductIdyʳ-Col≡expected :
+  ∀ M j → MtxProduct-Col M MtxIdy j ≡ MtxCol M j
+MtxProductIdyʳ-Col≡expected M j
+  rewrite MtxProductIdyʳ-Elem≡expected M Idx₁ j
+        | MtxProductIdyʳ-Elem≡expected M Idx₂ j
+        | MtxProductIdyʳ-Elem≡expected M Idx₃ j
+  = refl
 
--- -- Setup Matrix A
--- Row₁A : Vec ℕ 3
--- Row₁A = 1 ∷ 1 ∷ 1 ∷ []
--- 
--- Row₂A : Vec ℕ 3
--- Row₂A = 0 ∷ 1 ∷ 1 ∷ []
--- 
--- Row₃A : Vec ℕ 3
--- Row₃A = 0 ∷ 0 ∷ 1 ∷ []
--- 
--- A¹ : Matrix
--- A¹ = Row₁A ∷ Row₂A ∷ Row₃A ∷ []
--- -- Setup ProductA
--- ProductA : Matrix → Matrix
--- ProductA B = matMul A¹ B
--- 
--- ProductA-Row₁ : Matrix → Vec ℕ 3
--- ProductA-Row₁ B =
---   dot Row₁A (Col B Idx₁) ∷
---   dot Row₁A (Col B Idx₂) ∷
---   dot Row₁A (Col B Idx₃) ∷ []
--- 
--- ProductA-Row₂ : Matrix → Vec ℕ 3
--- ProductA-Row₂ B =
---   dot Row₂A (Col₁ B) ∷
---   dot Row₂A (Col₂ B) ∷
---   dot Row₂A (Col₃ B) ∷ []
--- 
--- ProductA-Row₃ : Matrix → Vec ℕ 3
--- ProductA-Row₃ B =
---   dot Row₃A (Col₁ B) ∷
---   dot Row₃A (Col₂ B) ∷
---   dot Row₃A (Col₃ B) ∷ []
--- 
--- ProductAB≡expected : ∀ B → ProductA B ≡
---   ProductA-Row₁ B ∷
---   ProductA-Row₂ B ∷
---   ProductA-Row₃ B ∷ []
--- ProductAB≡expected B = refl
--- -- Setup PowerA
--- PowerA : ℕ → Matrix
--- PowerA zero = I
--- PowerA (suc n) = ProductA (PowerA n)
--- 
--- -- Line 
--- -- I : Matrix 3 3
--- -- I =
--- --   ( 1 ∷  0 ∷  0 ∷ []) ∷
--- --   ( 0 ∷  1 ∷  0 ∷ []) ∷
--- --   ( 0 ∷  0 ∷  1 ∷ []) ∷ []
--- -- 
--- -- Tr : ℕ → ℕ
--- -- Tr zero = 0
--- -- Tr (suc n) = Tr n + suc n
--- -- 
--- -- ClosedFormAⁿ : ℕ → Matrix 3 3
--- -- ClosedFormAⁿ n =
--- --   ( 1 ∷  n ∷  (Tr n) ∷ []) ∷
--- --   ( 0 ∷  1 ∷  n      ∷ []) ∷
--- --   ( 0 ∷  0 ∷  1      ∷ []) ∷ []
--- -- 
--- -- A² : Matrix 3 3
--- -- A² =
--- --   ( 1 ∷  2 ∷  3 ∷ []) ∷
--- --   ( 0 ∷  1 ∷  2 ∷ []) ∷
--- --   ( 0 ∷  0 ∷  1 ∷ []) ∷ []
--- -- 
--- -- ProductA²≡expected : ProductA A ≡ A²
--- -- ProductA²≡expected = refl
--- -- 
--- -- PowerA : ℕ → Matrix 3 3
--- -- PowerA zero = I
--- -- PowerA (suc n) = ProductA (PowerA n)
--- -- 
--- -- -- Goal: ClosedFormAⁿ is correct
--- -- 
--- -- closed-form-base :
--- --   ClosedFormAⁿ zero ≡ I
--- -- closed-form-base = refl
--- -- 
--- -- closed-form-step :
--- --   ∀ n → ProductA (ClosedFormAⁿ n) ≡ ClosedFormAⁿ (suc n)
--- -- closed-form-step n =
--- --   begin
--- --     ProductA (ClosedFormAⁿ n)
--- --   ≡⟨⟩
--- --     matMul (ClosedFormAⁿ n) A
--- --   ≡⟨⟩
--- --     ( 1 ∷  (suc n) ∷  (Tr n + suc n) ∷ []) ∷
--- --     ( 0 ∷  1       ∷  (suc n)        ∷ []) ∷
--- --     ( 0 ∷  0       ∷  1              ∷ []) ∷ []
--- --   ≡⟨⟩
--- --     ClosedFormAⁿ (suc n)
--- --   ∎
+-- Identity Matrix Left Product Column
+MtxProductIdyˡ-Col≡expected :
+  ∀ M j → MtxProduct-Col MtxIdy M j ≡ MtxCol M j
+MtxProductIdyˡ-Col≡expected M j
+  rewrite MtxProductIdyˡ-Elem≡expected M Idx₁ j
+        | MtxProductIdyˡ-Elem≡expected M Idx₂ j
+        | MtxProductIdyˡ-Elem≡expected M Idx₃ j
+  = refl
 
+-- Identity Matrix Right Product
+MtxProductIdyʳ≡expected :
+  ∀ M → MtxProduct M MtxIdy ≡ M
+MtxProductIdyʳ≡expected M
+  rewrite MtxProductIdyʳ-Elem≡expected M Idx₁ Idx₁
+        | MtxProductIdyʳ-Elem≡expected M Idx₁ Idx₂
+        | MtxProductIdyʳ-Elem≡expected M Idx₁ Idx₃
+        | MtxProductIdyʳ-Elem≡expected M Idx₂ Idx₁
+        | MtxProductIdyʳ-Elem≡expected M Idx₂ Idx₂
+        | MtxProductIdyʳ-Elem≡expected M Idx₂ Idx₃
+        | MtxProductIdyʳ-Elem≡expected M Idx₃ Idx₁
+        | MtxProductIdyʳ-Elem≡expected M Idx₃ Idx₂
+        | MtxProductIdyʳ-Elem≡expected M Idx₃ Idx₃
+        | MtxElem≡expected M
+  = refl
 
+-- Identity Matrix Left Product
+MtxProductIdyˡ≡expected :
+  ∀ M → MtxProduct MtxIdy M ≡ M
+MtxProductIdyˡ≡expected M
+  rewrite MtxProductIdyˡ-Elem≡expected M Idx₁ Idx₁
+        | MtxProductIdyˡ-Elem≡expected M Idx₁ Idx₂
+        | MtxProductIdyˡ-Elem≡expected M Idx₁ Idx₃
+        | MtxProductIdyˡ-Elem≡expected M Idx₂ Idx₁
+        | MtxProductIdyˡ-Elem≡expected M Idx₂ Idx₂
+        | MtxProductIdyˡ-Elem≡expected M Idx₂ Idx₃
+        | MtxProductIdyˡ-Elem≡expected M Idx₃ Idx₁
+        | MtxProductIdyˡ-Elem≡expected M Idx₃ Idx₂
+        | MtxProductIdyˡ-Elem≡expected M Idx₃ Idx₃
+        | MtxElem≡expected M
+  = refl
+
+-- Matrix Power
+MtxPower : Matrix → ℕ → Matrix
+MtxPower M zero = MtxIdy
+MtxPower M (suc n) = MtxProduct M (MtxPower M n)
+
+-- Triangular Number
+Tr : ℕ → ℕ
+Tr zero = zero
+Tr (suc n) = (suc n) + (Tr n)
+
+-- 3x3 Accumulator Matrix
+MtxAcc : Matrix
+MtxAcc =
+  (1 ∷ 1 ∷ 1 ∷ []) ∷
+  (0 ∷ 1 ∷ 1 ∷ []) ∷
+  (0 ∷ 0 ∷ 1 ∷ []) ∷ []
+
+-- Closed Form Target
+Acc : ℕ → Matrix
+Acc n =
+  (1 ∷ n ∷ Tr n ∷ []) ∷
+  (0 ∷ 1 ∷ n    ∷ []) ∷
+  (0 ∷ 0 ∷ 1    ∷ []) ∷ []
+
+Acc⁰≡expected : Acc zero ≡ MtxIdy
+Acc⁰≡expected = refl
+
+Acc¹≡expected : Acc (suc zero) ≡ MtxAcc
+Acc¹≡expected = refl
+
+-- To Show: ∀ n → MtxPower MtxAcc n ≡ Acc n
