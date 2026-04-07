@@ -361,13 +361,16 @@ MtxProductIdyˡ≡expected M
 
 -- Matrix Power
 MtxPower : Matrix → ℕ → Matrix
-MtxPower M zero = MtxIdy
+MtxPower M zero = MtxIdy -- For ℕ > 0, encountered on the right
 MtxPower M (suc n) = MtxProduct M (MtxPower M n)
 
 -- Triangular Number
 Tr : ℕ → ℕ
-Tr zero = zero
+Tr zero = zero -- For ℕ > 0, encountered on the right
 Tr (suc n) = (suc n) + (Tr n)
+
+Tr≡expected : ∀ n → (Tr n) + n + 1 ≡ Tr (suc n)
+Tr≡expected n = {!!}
 
 -- 3x3 Accumulator Matrix
 MtxAcc : Matrix
@@ -390,3 +393,11 @@ Acc¹≡expected : Acc (suc zero) ≡ MtxAcc
 Acc¹≡expected = refl
 
 -- To Show: ∀ n → MtxPower MtxAcc n ≡ Acc n
+MtxProductAcc₁₃≡expected :
+  ∀ n → MtxProduct-Elem MtxAcc (Acc n) Idx₁ Idx₃ ≡ Tr (suc n)
+MtxProductAcc₁₃≡expected n
+  rewrite MtxProduct-Elem≡expected MtxAcc (Acc n) Idx₁ Idx₃
+        | +-zeroʳ n
+        | +-zeroʳ (Tr n)
+        | suc-sumˡ n (Tr n)
+  = refl
