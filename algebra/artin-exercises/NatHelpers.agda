@@ -36,12 +36,6 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym)
 +-oneˡ zero = refl
 +-oneˡ (suc n) rewrite +-oneˡ n = refl
 
-+-one-sumʳ : ∀ x y → (x + y) + (suc zero) ≡ (suc (x + y))
-+-one-sumʳ x y rewrite +-oneʳ (x + y) = refl
-
-+-one-sumˡ : ∀ x y → (suc zero) + (x + y) ≡ (suc (x + y))
-+-one-sumˡ x y rewrite +-oneˡ (x + y) = refl
-
 suc-sumʳ : ∀ x y → x + (suc y) ≡ (suc (x + y))
 suc-sumʳ zero y = refl
 suc-sumʳ (suc x) y rewrite suc-sumʳ x y = refl
@@ -49,4 +43,10 @@ suc-sumʳ (suc x) y rewrite suc-sumʳ x y = refl
 suc-sumˡ : ∀ x y → suc(x) + y ≡ (suc (x + y))
 suc-sumˡ x y = refl
 
+symm-sum : ∀ x y → (x + y) ≡ (y + x)
+symm-sum zero y rewrite +-zeroʳ y = refl
+symm-sum (suc x) y
+  rewrite symm-sum x y
+        | suc-sumʳ y x
+  = refl
 

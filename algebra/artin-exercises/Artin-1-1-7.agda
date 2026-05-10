@@ -366,11 +366,14 @@ MtxPower M (suc n) = MtxProduct M (MtxPower M n)
 
 -- Triangular Number
 Tr : ℕ → ℕ
-Tr zero = zero -- For ℕ > 0, encountered on the right
+Tr zero = zero
 Tr (suc n) = (suc n) + (Tr n)
 
 Tr≡expected : ∀ n → (Tr n) + n + 1 ≡ Tr (suc n)
-Tr≡expected n = {!!}
+Tr≡expected n
+  rewrite +-oneʳ (Tr n + n)
+        | symm-sum (Tr n) n
+  = refl
 
 -- 3x3 Accumulator Matrix
 MtxAcc : Matrix
@@ -400,4 +403,5 @@ MtxProductAcc₁₃≡expected n
         | +-zeroʳ n
         | +-zeroʳ (Tr n)
         | suc-sumˡ n (Tr n)
+        | Tr≡expected n
   = refl
