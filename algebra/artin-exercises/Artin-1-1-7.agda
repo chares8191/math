@@ -389,19 +389,65 @@ Acc n =
   (0 ∷ 1 ∷ n    ∷ []) ∷
   (0 ∷ 0 ∷ 1    ∷ []) ∷ []
 
+
+-- To Show: ∀ n → MtxPower MtxAcc n ≡ Acc n
 Acc⁰≡expected : Acc zero ≡ MtxIdy
 Acc⁰≡expected = refl
 
 Acc¹≡expected : Acc (suc zero) ≡ MtxAcc
 Acc¹≡expected = refl
 
--- To Show: ∀ n → MtxPower MtxAcc n ≡ Acc n
-MtxProductAcc₁₃≡expected :
-  ∀ n → MtxProduct-Elem MtxAcc (Acc n) Idx₁ Idx₃ ≡ Tr (suc n)
-MtxProductAcc₁₃≡expected n
+-- Accumulator Product Element
+MtxProductAcc-Elem≡expected :
+  ∀ n i j →
+  MtxProduct-Elem MtxAcc (Acc n) i j ≡ MtxElem (Acc (suc n)) i j
+MtxProductAcc-Elem≡expected n fzero fzero = refl
+MtxProductAcc-Elem≡expected n fzero (fsuc fzero)
+  rewrite MtxProduct-Elem≡expected MtxAcc (Acc n) Idx₁ Idx₂
+        | +-zeroʳ n
+        | +-zeroʳ (n + 1)
+        | +-oneʳ n
+  = refl
+MtxProductAcc-Elem≡expected n fzero (fsuc (fsuc fzero))
   rewrite MtxProduct-Elem≡expected MtxAcc (Acc n) Idx₁ Idx₃
         | +-zeroʳ n
         | +-zeroʳ (Tr n)
         | suc-sumˡ n (Tr n)
         | Tr≡expected n
+  = refl
+MtxProductAcc-Elem≡expected n (fsuc fzero) fzero = refl
+MtxProductAcc-Elem≡expected n (fsuc fzero) (fsuc fzero) = refl
+MtxProductAcc-Elem≡expected n (fsuc fzero) (fsuc (fsuc fzero))
+  rewrite MtxProduct-Elem≡expected MtxAcc (Acc n) Idx₂ Idx₃
+        | +-zeroʳ n
+        | +-oneʳ n
+  = refl
+MtxProductAcc-Elem≡expected n (fsuc (fsuc fzero)) fzero = refl
+MtxProductAcc-Elem≡expected n (fsuc (fsuc fzero)) (fsuc fzero) = refl
+MtxProductAcc-Elem≡expected n (fsuc (fsuc fzero)) (fsuc (fsuc fzero)) = refl
+
+-- Accumulator Product
+MtxProductAcc≡expected :
+  ∀ n → MtxProduct MtxAcc (Acc n) ≡ Acc (suc n)
+MtxProductAcc≡expected n
+  rewrite MtxProductAcc-Elem≡expected n Idx₁ Idx₁
+        | MtxProductAcc-Elem≡expected n Idx₁ Idx₂
+        | MtxProductAcc-Elem≡expected n Idx₁ Idx₃
+        | MtxProductAcc-Elem≡expected n Idx₂ Idx₁
+        | MtxProductAcc-Elem≡expected n Idx₂ Idx₂
+        | MtxProductAcc-Elem≡expected n Idx₂ Idx₃
+        | MtxProductAcc-Elem≡expected n Idx₃ Idx₁
+        | MtxProductAcc-Elem≡expected n Idx₃ Idx₂
+        | MtxProductAcc-Elem≡expected n Idx₃ Idx₃
+        | MtxElem≡expected (Acc (suc n))
+  = refl
+
+-- Accumulator Power
+MtxPowerAcc≡expected :
+  ∀ n → MtxPower MtxAcc n ≡ Acc n
+MtxPowerAcc≡expected zero
+  rewrite Acc⁰≡expected = refl
+MtxPowerAcc≡expected (suc n)
+  rewrite MtxPowerAcc≡expected n
+        | MtxProductAcc≡expected n
   = refl
