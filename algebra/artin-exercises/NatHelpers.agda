@@ -43,10 +43,13 @@ suc-sumʳ (suc x) y rewrite suc-sumʳ x y = refl
 suc-sumˡ : ∀ x y → suc(x) + y ≡ (suc (x + y))
 suc-sumˡ x y = refl
 
-symm-sum : ∀ x y → (x + y) ≡ (y + x)
-symm-sum zero y rewrite +-zeroʳ y = refl
-symm-sum (suc x) y
-  rewrite symm-sum x y
+NatSum-Commutative : ∀ x y → (x + y) ≡ (y + x)
+NatSum-Commutative zero y rewrite +-zeroʳ y = refl
+NatSum-Commutative (suc x) y
+  rewrite NatSum-Commutative x y
         | suc-sumʳ y x
   = refl
+
+-- NatMult-Commutative : ∀ x y → (x * y) ≡ (y * x)
+-- NatMult-Commutative zero y rewrite *-zeroʳ y = refl
 

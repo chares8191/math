@@ -8,18 +8,21 @@ import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl; sym)
 
 Tuple : ℕ → Set
-Tuple k = Vec ℕ k
+Tuple len = Vec ℕ len
 
 Square : ℕ → Set
-Square k = Vec (Tuple k) k
+Square len = Vec (Vec ℕ len) len
 
 TupleLookup :
-  ∀ {k} → Tuple k → Fin k → ℕ
+  ∀ {len} →
+  Vec ℕ len →
+  Fin len →
+  ℕ
 TupleLookup (head ∷ tail) fzero = head
-TupleLookup (head ∷ tail) (fsuc k) = TupleLookup tail k
+TupleLookup (head ∷ tail) (fsuc len) = TupleLookup tail len
 
 TupleProduct :
-  ∀ {k} → Tuple k → Tuple k → ℕ
+  ∀ {len} → Tuple len → Tuple len → ℕ
 TupleProduct [] [] = zero
 TupleProduct (headˡ ∷ tailˡ) (headʳ ∷ tailʳ)
   = headˡ * headʳ + TupleProduct tailˡ tailʳ
@@ -44,7 +47,11 @@ module SquareMatrix (N : ℕ) where
 
   -- Vector Element
   VectorElement : Vector → Index → ℕ
-  VectorElement V k = TupleLookup V k
+  VectorElement T k = TupleLookup T k
+
+  -- Matrix Element
+  MatrixElement : Matrix → Index → Index → ℕ
+  MatrixElement M i j = TupleLookup (MatrixLookup M i) j
 
   
 

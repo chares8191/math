@@ -3,10 +3,9 @@ module Artin-1-1-7 where
 open import NatHelpers
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Nat using (ℕ; zero; suc; _+_; _*_)
-open import Data.Vec using (Vec; []; _∷_; map; zipWith; foldr′; lookup; tabulate)
+open import Data.Vec using (Vec; []; _∷_; lookup)
 import Relation.Binary.PropositionalEquality as Eq
-open Eq using (_≡_; refl; sym)
-open Eq.≡-Reasoning using (begin_; step-≡-∣; _∎)
+open Eq using (_≡_; refl)
 
 -- The baby steps kind of thing.
 
@@ -372,7 +371,7 @@ Tr (suc n) = (suc n) + (Tr n)
 Tr≡expected : ∀ n → (Tr n) + n + 1 ≡ Tr (suc n)
 Tr≡expected n
   rewrite +-oneʳ (Tr n + n)
-        | symm-sum (Tr n) n
+        | NatSum-Commutative (Tr n) n
   = refl
 
 -- 3x3 Accumulator Matrix
